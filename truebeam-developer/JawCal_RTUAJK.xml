@@ -1,0 +1,322 @@
+<VarianResearchBeam SchemaVersion="1.0">
+<SetBeam>
+  <Id>1</Id>
+  <MLCModel>NDS120</MLCModel>
+  <Accs>
+  <Acc1>0</Acc1> 
+  <Acc2>0</Acc2> 
+  <Acc3>0</Acc3> 
+  <Acc4>0</Acc4> 
+  </Accs>
+  <ControlPoints>
+    <Cp> <!-- CP0 -->
+      <SubBeam>
+        <Seq>0</Seq>
+        <Name>Indpendent Jaw</Name>
+      </SubBeam>
+      <Energy>6xFFF</Energy>
+      <Mu>0</Mu>
+      <DRate>400</DRate>
+      <GantryRtn>180</GantryRtn>
+      <CollRtn>90</CollRtn>
+      <CouchVrt>100</CouchVrt>
+      <CouchLat>100</CouchLat>
+      <CouchLng>18</CouchLng>
+      <CouchRtn>180</CouchRtn>
+      <Y1>20.0</Y1>
+      <Y2>20.0</Y2>
+      <X1>20.0</X1>
+      <X2>20.0</X2>
+    </Cp>
+    <Cp>  <!-- CP1 : Rotate col to find beam CAX on EPID -->
+      <CollRtn>270</CollRtn>
+    </Cp>
+    <Cp>  <!-- CP2 -->
+      <X1>10.0</X1>
+    </Cp>
+    <Cp>  <!-- CP3 -->
+      <X1>0.0</X1>
+    </Cp>
+    <Cp>  <!-- CP4 -->
+      <X1>-2.0</X1>
+    </Cp>
+    <Cp>  <!-- CP5 -->
+      <X1>20.0</X1>
+    </Cp>
+    <Cp>  <!-- CP6 -->
+      <X2>10.0</X2>
+    </Cp>
+    <Cp>  <!-- CP7 -->
+      <X2>0.0</X2>
+    </Cp>
+    <Cp>  <!-- CP8 -->
+      <X2>-2.0</X2>
+    </Cp>
+    <Cp>  <!-- CP9 -->
+      <X2>20.0</X2>
+    </Cp>
+    <Cp>  <!-- CP10 -->
+      <Y1>10.0</Y1>
+    </Cp>
+    <Cp>  <!-- CP11 -->
+      <Y1>0.0</Y1>
+    </Cp>
+    <Cp>  <!-- CP12 -->
+      <Y1>-10.0</Y1>
+    </Cp>
+    <Cp>  <!-- CP13 -->
+      <Y1>20.0</Y1>
+    </Cp>
+    <Cp>  <!-- CP14 -->
+      <Y2>10.0</Y2>
+    </Cp>
+    <Cp>  <!-- CP15 -->
+      <Y2>0.0</Y2>
+    </Cp>
+    <Cp>  <!-- CP16 -->
+      <Y2>-10.0</Y2>
+    </Cp>
+  </ControlPoints>
+  <ImagingParameters>
+    <OutsideTreatment>
+      <MaxMu>3000</MaxMu>
+    </OutsideTreatment>
+    <ImagingPoints>
+      <ImagingPoint>
+        <Cp>0</Cp>
+        <Acquisition>
+          <AcquisitionId>1</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <!-- The next line is not needed for imaging but can be used to increase the standstill time before the acquisition (about 5 frames for one second) -->
+              <Overwrite parameter="resetFrames">5</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+        <Mvd>
+          <Positions>
+            <Lat>0</Lat>
+            <Lng>0</Lng>
+            <Vrt>0</Vrt>
+            <Pitch>0</Pitch>
+          </Positions>
+        </Mvd>
+      </ImagingPoint>
+      <ImagingPoint>
+        <Cp>1</Cp>
+        <Acquisition>
+          <AcquisitionId>2</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <Overwrite parameter="resetFrames">5</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+      </ImagingPoint>
+      <ImagingPoint>
+        <Cp>2</Cp>
+        <Acquisition>
+          <AcquisitionId>3</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <Overwrite parameter="resetFrames">5</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+      </ImagingPoint>
+      <ImagingPoint>
+        <Cp>3</Cp>
+        <Acquisition>
+          <AcquisitionId>4</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <Overwrite parameter="resetFrames">5</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+      </ImagingPoint>
+      <ImagingPoint>
+        <Cp>4</Cp>
+        <Acquisition>
+          <AcquisitionId>5</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <Overwrite parameter="resetFrames">5</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+      </ImagingPoint>
+      <ImagingPoint>
+        <Cp>6</Cp>
+        <Acquisition>
+          <AcquisitionId>6</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <Overwrite parameter="resetFrames">5</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+      </ImagingPoint>
+      <ImagingPoint>
+        <Cp>7</Cp>
+        <Acquisition>
+          <AcquisitionId>7</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <Overwrite parameter="resetFrames">5</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+      </ImagingPoint>
+      <ImagingPoint>
+        <Cp>8</Cp>
+        <Acquisition>
+          <AcquisitionId>8</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <Overwrite parameter="resetFrames">5</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+      </ImagingPoint>
+      <ImagingPoint>
+        <Cp>10</Cp>
+        <Acquisition>
+          <AcquisitionId>9</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <Overwrite parameter="resetFrames">5</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+      </ImagingPoint>
+      <ImagingPoint>
+        <Cp>11</Cp>
+        <Acquisition>
+          <AcquisitionId>10</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <Overwrite parameter="resetFrames">5</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+      </ImagingPoint>
+      <ImagingPoint>
+        <Cp>12</Cp>
+        <Acquisition>
+          <AcquisitionId>11</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <Overwrite parameter="resetFrames">5</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+      </ImagingPoint>
+      <ImagingPoint>
+        <Cp>14</Cp>
+        <Acquisition>
+          <AcquisitionId>12</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <Overwrite parameter="resetFrames">5</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+      </ImagingPoint>
+      <ImagingPoint>
+        <Cp>15</Cp>
+        <Acquisition>
+          <AcquisitionId>13</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <Overwrite parameter="resetFrames">5</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+      </ImagingPoint>
+      <ImagingPoint>
+        <Cp>16</Cp>
+        <Acquisition>
+          <AcquisitionId>14</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <Overwrite parameter="resetFrames">5</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+      </ImagingPoint>
+    </ImagingPoints>
+    <ImagingTolerances />
+  </ImagingParameters>
+</SetBeam>
+</VarianResearchBeam>

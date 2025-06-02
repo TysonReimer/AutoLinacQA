@@ -1,0 +1,72 @@
+# 1. Setup
+zip_path ← path to .zip containing .dcm images
+tmp_dir ← make temporary directory
+extract zip_path into tmp_dir
+DATA_DIR ← tmp_dir
+FILES ← sorted list of files in DATA_DIR
+
+# 2. Compute beam CAX
+IMG1 ← pixel array of FILES[0]
+IMG2 ← pixel array of FILES[1]
+C1 ← centroid of pixels ≥50% max intensity in IMG1
+C2 ← centroid of pixels ≥50% max intensity in IMG2
+beam_CAX ← midpoint of C1 and C2 (swap to (x,y) order)
+
+# 3. Prepare lists for storing results
+jaw_pos_list ← []
+figures ← []
+
+# 4. Process each jaw image not used to calc the MV CAX
+for FILE in FILES[2:]:
+    ds ← read DICOM FILE
+    img ← ds.pixel_array
+    normalize img to [0,1]
+    if ds.BeamLimitingDeviceAngle ≈ 270: # If col was rotated 
+        img ← transpose img
+        this_CAX ← swap beam_CAX
+    else:
+        this_CAX ← beam_CAX
+
+    # detect jaw positions/edges
+    for each (axis, direction) in [(x,–),(x,+),(y,–),(y,+)]:
+        scan central 60% of rows or columns  # avoid primary col shadow
+        at each slice, find first pixel ≥50% of img max on given side
+        collect valid slice indices, take their median
+        convert that median pixel index to mm via this_CAX and DICOM spacing
+        record edge_idx and edge_mm
+
+    # get planned jaw positions from ds
+    (x1,x2,y1,y2) ← ds.ExposureSequence…LeafJawPositions
+
+    append ((x1,x2,y1,y2), (x1_edge_mm,x2_edge_mm,y1_edge_mm,y2_edge_mm))
+        to jaw_pos_list
+
+    # plot and annotate for pdf report
+    create figure, show img
+    draw vertical lines at x1_edge, x2_edge; horizontal at y1_edge, y2_edge
+    label each with Meas, Plan, Diff
+    add figure to figures
+
+# 5. Build summary data & QA-Track dict
+summary_data ← []
+qat_dict ← {}
+for (plan_coords, meas_coords) in jaw_pos_list:
+    diffs ← meas_coords – plan_coords
+    append formatted diffs to summary_data
+    for jaw_str, plan, meas in zip(["X1","X2","Y1","Y2"], plan_coords, meas_coords):
+        key ← jaw_str + " " + round(plan/10)
+        append (meas – plan) to qat_dict[key]
+for each key in qat_dict:
+    qat_dict[key] ← max absolute value of its list
+
+# 6. Create summary figure
+max_diffs ← max absolute values per jaw from summary_data
+create figure 
+add title and text reporting max_diffs
+add table with summary_data and headers ["X1 Diff","X2 Diff","Y1 Diff","Y2 Diff"]
+
+# 7. Write PDF report
+open PDF at output path
+save summary figure
+for fig in figures: save fig
+close PDF

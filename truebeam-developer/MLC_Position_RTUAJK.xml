@@ -1,0 +1,270 @@
+<VarianResearchBeam SchemaVersion="1.0">
+<SetBeam>
+  <Id>1</Id>
+  <MLCModel>NDS120</MLCModel>
+  <Accs>
+  <Acc1>0</Acc1> 
+  <Acc2>0</Acc2> 
+  <Acc3>0</Acc3> 
+  <Acc4>0</Acc4> 
+  </Accs>
+  <ControlPoints>
+    <Cp> <!-- CP00 -->
+      <SubBeam>
+        <Seq>0</Seq>
+        <Name>MLC Position</Name>
+      </SubBeam>
+      <Energy>6xFFF</Energy>
+      <Mu>0</Mu>
+      <DRate>1400</DRate>
+      <GantryRtn>180</GantryRtn>
+      <CollRtn>90</CollRtn>
+      <CouchVrt>100</CouchVrt>
+      <CouchLat>100</CouchLat>
+      <CouchLng>18</CouchLng>
+      <CouchRtn>180</CouchRtn>
+      <Mlc>
+        <ID>1</ID>
+        <B>15 16 17 18 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 18 17 16 15</B>
+        <A>15 16 17 18 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 18 17 16 15</A>
+      </Mlc>
+    </Cp>
+    <Cp> <!-- CP01 -->
+      <CollRtn>270</CollRtn>
+    </Cp>
+    <Cp>  <!-- CP02 -->
+      <Mlc>
+        <ID>1</ID>
+        <B>15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10</B>
+        <A>15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10</A>
+      </Mlc>
+    </Cp>
+    <Cp>  <!-- CP03 -->
+      <Mlc>
+        <ID>1</ID>
+        <B>10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15</B>
+        <A>10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15 10 15</A>
+      </Mlc>
+    </Cp>
+    <Cp>  <!-- CP04 -->
+      <Mlc>
+        <ID>1</ID>
+        <B>10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10</B>
+        <A>15 16 17 18 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 18 17 16 15</A>
+      </Mlc>
+    </Cp>
+    <Cp>  <!-- CP05 -->
+      <Mlc>
+        <ID>1</ID>
+        <B>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</B>
+        <A>15 16 17 18 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 18 17 16 15</A>
+      </Mlc>
+    </Cp>
+    <Cp>  <!-- CP06 -->
+      <Mlc>
+        <ID>1</ID>
+        <B>-10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10</B>
+        <A>15 16 17 18 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 18 17 16 15</A>
+      </Mlc>
+    </Cp>
+    <Cp>  <!-- CP07 -->
+      <Mlc>
+        <ID>1</ID>
+        <B>15 16 17 18 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 18 17 16 15</B>
+        <A>10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10</A>
+      </Mlc>
+    </Cp>
+    <Cp>  <!-- CP08 -->
+      <Mlc>
+        <ID>1</ID>
+        <B>15 16 17 18 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 18 17 16 15</B>
+        <A>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</A>
+      </Mlc>
+    </Cp>
+    <Cp>  <!-- CP09 -->
+      <Mlc>
+        <ID>1</ID>
+        <B>15 16 17 18 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 18 17 16 15</B>
+        <A>-10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10 -10</A>
+      </Mlc>
+    </Cp>
+  </ControlPoints>
+  <ImagingParameters>
+    <OutsideTreatment>
+      <MaxMu>3000</MaxMu>
+    </OutsideTreatment>
+    <ImagingPoints>
+      <ImagingPoint>
+        <Cp>0</Cp>
+        <Acquisition>
+          <AcquisitionId>1</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <!-- The next line is not needed for imaging but can be used to increase the standstill time before the acquisition (about 5 frames for one second) -->
+              <Overwrite parameter="resetFrames">10</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+        <Mvd>
+          <Positions>
+            <Lat>0</Lat>
+            <Lng>0</Lng>
+            <Vrt>0</Vrt>
+            <Pitch>0</Pitch>
+          </Positions>
+        </Mvd>
+      </ImagingPoint>
+      <ImagingPoint>
+        <Cp>1</Cp>
+        <Acquisition>
+          <AcquisitionId>2</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <Overwrite parameter="resetFrames">10</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+      </ImagingPoint>
+      <ImagingPoint>
+        <Cp>2</Cp>
+        <Acquisition>
+          <AcquisitionId>3</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <Overwrite parameter="resetFrames">10</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+      </ImagingPoint>
+      <ImagingPoint>
+        <Cp>3</Cp>
+        <Acquisition>
+          <AcquisitionId>4</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <Overwrite parameter="resetFrames">10</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+      </ImagingPoint>
+      <ImagingPoint>
+        <Cp>4</Cp>
+        <Acquisition>
+          <AcquisitionId>5</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <Overwrite parameter="resetFrames">10</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+      </ImagingPoint>
+      <ImagingPoint>
+        <Cp>5</Cp>
+        <Acquisition>
+          <AcquisitionId>6</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <Overwrite parameter="resetFrames">10</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+      </ImagingPoint>
+      <ImagingPoint>
+        <Cp>6</Cp>
+        <Acquisition>
+          <AcquisitionId>7</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <Overwrite parameter="resetFrames">10</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+      </ImagingPoint>
+      <ImagingPoint>
+        <Cp>7</Cp>
+        <Acquisition>
+          <AcquisitionId>8</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <Overwrite parameter="resetFrames">10</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+      </ImagingPoint>
+      <ImagingPoint>
+        <Cp>8</Cp>
+        <Acquisition>
+          <AcquisitionId>9</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <Overwrite parameter="resetFrames">10</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+      </ImagingPoint>
+            <ImagingPoint>
+        <Cp>9</Cp>
+        <Acquisition>
+          <AcquisitionId>10</AcquisitionId>
+          <AcquisitionSpecs />
+          <AcquisitionParameters>
+            <ImageMode id="Highres">
+              <Overwrite parameter="resetFrames">10</Overwrite>
+              <Overwrite parameter="numberOfFrames">5</Overwrite>
+              <Overwrite parameter="dosePerFrame">1.5</Overwrite>
+            </ImageMode>
+            <CalibrationSet>DefaultCalibrationSetId</CalibrationSet>
+            <MV />
+          </AcquisitionParameters>
+        </Acquisition>
+      </ImagingPoint>
+    </ImagingPoints>
+    <ImagingTolerances />
+  </ImagingParameters>
+</SetBeam>
+</VarianResearchBeam>

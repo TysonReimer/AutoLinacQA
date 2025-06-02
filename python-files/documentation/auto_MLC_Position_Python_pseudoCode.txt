@@ -1,0 +1,66 @@
+# 1. Setup
+DATA_DIR ← path to folder of files
+FILES ← sorted list of files in DATA_DIR
+
+# 2. Compute beam central axis (CAX)
+IMG1, IMG2 ← pixel arrays from first two DICOMs
+C1, C2 ← centroids of high-intensity regions in IMG1 and IMG2
+beam_CAX ← midpoint of C1 and C2 (swap to (x,y) order)
+
+# 3. Determine EPID-to-MLC rotation
+COMB1, COMB2 ← pixel arrays from next two DICOMs
+ROT1 ← avg angle calculated by comparing opposing leaf positions (leaf N from bank A vs bank B) from COMB1
+ROT2 ← same for COMB2
+rot_angle ← average(ROT1, ROT2)
+
+# 4. Establish baseline leaf indices
+ROTATED_COMB1 ← rotate COMB1 by rot_angle
+LEAF_INDICES ← positions of peaks in intensity profile of ROTATED_COMB1
+leaf_axis ← axis perpendicular to direction of leaf travel
+
+# 5. Load planned MLC positions
+if machine is RTUS:
+    PLANNED_POS ← predefined RTUS MLC leaf positions
+else:
+    PLANNED_POS ← predefined 120MLC MLC leaf positions
+
+# 6. Initialize lists to store results
+all_errors, alerts, worst_A, worst_B, figures_list ← empty
+
+# 7. For each remaining QA image, i.e., for non-MV-CAX and non-COMB images
+for each FILE in FILES[4:]:
+    img ← read and rotate pixel array by rot_angle
+    normalize img to [0,1]
+
+    # 7a. Measure each leaf’s position
+    for each index in LEAF_INDICES:
+        detect edge pixel along leaf_axis at 50% intensity
+        convert pixel index to mm relative to beam_CAX
+        collect positions for Bank A and Bank B
+
+    # 7b. Compute per-leaf errors
+    A_errors ← measured_A_mm – PLANNED_POS[A_row]
+    B_errors ← measured_B_mm – PLANNED_POS[B_row]
+    record abs(errors) in all_errors
+    flag any >2 mm as ALERT, >5 mm as ACTION ALERT (append to alerts)
+    record worst leaf for each bank (append to worst_A, worst_B)
+
+    # 7c. Build and store figure:
+    #   - grayscale image with detected jaw edges + text
+    #   - bar charts of A_errors and B_errors, highlighting worst
+    add figure to figures_list
+
+# 8. Create summary figure
+display all alerts with color coding
+compute and display max(all_errors) and mean(all_errors)
+
+# 9. Build QA-Track dictionary
+for each recorded (measured_A_mm, measured_B_mm, plan_A, plan_B):
+    key ← "<median plan A> <negative median plan B>"
+    value ← (max deviation A, max deviation B)
+    add to qat_dict[key] = value
+
+# 10. Write PDF report
+open PDF at output path
+save summary figure, then each figure in figures_list
+close PDF
