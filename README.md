@@ -15,5 +15,5 @@ not intended for clinical use.
 
 Some of the Developer mode scripts contained in this repository allow for
 the execution of automatic gantry and couch movements. Ensure that you follow
-all safety guidelines for any linac delivery to avoid collissions.
+all safety guidelines for any linac delivery to avoid collisions.
 
