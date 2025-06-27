@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 from pydicom import dcmread
 from scipy.signal import find_peaks
 from scipy.ndimage import rotate
+from scipy import ndimage as ndi
+from skimage import morphology
 from matplotlib.backends.backend_pdf import PdfPages
 
 import zipfile
@@ -17,9 +19,9 @@ import io
 ###############################################################################
 
 
-def _make_qat_dict_entry(mlc_A_calc_pos, mlc_B_calc_pos,
-                         mlc_A_plan_pos, mlc_B_plan_pos,
-                         qat_dict):
+def _make_qat_dict_entry(
+    mlc_A_calc_pos, mlc_B_calc_pos, mlc_A_plan_pos, mlc_B_plan_pos, qat_dict
+):
     """Make entry into dict used for QA Track reporting
 
     Parameters
@@ -52,14 +54,32 @@ def _make_qat_dict_entry(mlc_A_calc_pos, mlc_B_calc_pos,
     A_max_error_idx = np.argmax(np.abs(mlc_A_calc_pos - mlc_A_plan_pos))
     B_max_error_idx = np.argmax(np.abs(mlc_B_calc_pos - mlc_B_plan_pos))
 
-    A_max_err = (mlc_A_calc_pos[A_max_error_idx]
-                 - mlc_A_plan_pos[A_max_error_idx])
-    B_max_err = (mlc_B_calc_pos[B_max_error_idx]
-                 - mlc_B_plan_pos[B_max_error_idx])
+    A_max_err = mlc_A_calc_pos[A_max_error_idx] - mlc_A_plan_pos[A_max_error_idx]
+    B_max_err = mlc_B_calc_pos[B_max_error_idx] - mlc_B_plan_pos[B_max_error_idx]
 
     qat_dict[this_str] = A_max_err, B_max_err
 
     return qat_dict
+
+
+def suppress_hot_pixels(im, structure=np.ones((3, 3), bool)):
+    """ """
+    im = im.astype(float, copy=False)
+
+    hot_candidate = im > 0.3
+
+    isolated = hot_candidate & ~morphology.binary_opening(hot_candidate, structure)
+
+    if not isolated.any():
+        return im
+
+    kernel = np.ones((3, 3), float)
+    kernel[1, 1] = 0
+    neigh_mean = ndi.convolve(im, kernel, mode="reflect") / 8.0
+
+    im_fixed = im.copy()
+    im_fixed[isolated] = neigh_mean[isolated]
+    return im_fixed
 
 
 def _find_center_of_img(img):
@@ -78,11 +98,13 @@ def _find_center_of_img(img):
 
     # Normalize image
     img_normalized = (img - np.min(img)) / (np.max(img) - np.min(img))
+    img_normalized = suppress_hot_pixels(im=img_normalized)
+    img_normalized = (img_normalized - np.min(img_normalized)) / (
+        np.max(img_normalized) - np.min(img_normalized)
+    )
 
     # Find the center pixel
-    c_pix = np.argwhere(
-        img_normalized >= 0.5 * np.max(img_normalized)
-    ).mean(axis=0)
+    c_pix = np.argwhere(img_normalized >= 0.5 * np.max(img_normalized)).mean(axis=0)
 
     return c_pix
 
@@ -149,15 +171,17 @@ def _idx_to_mm(ds, do_x, image, edge_pixel_position, beam_CAX=None):
 
     if do_x:
         # For an x-edge, convert the x coordinate relative to center:
-        physical_edge = (edge_pixel_position - center_pixel[0]) * \
-                        pixel_spacing[1] #+ origin[0]
+        physical_edge = (edge_pixel_position - center_pixel[0]) * pixel_spacing[
+            1
+        ]  # + origin[0]
         if beam_CAX is None:
             physical_edge += origin[0]
 
     else:  # If doing y
         # For a y-edge, convert the y coordinate relative to center:
-        physical_edge = (edge_pixel_position - center_pixel[1]) * \
-                        pixel_spacing[0] #+ origin[1]
+        physical_edge = (edge_pixel_position - center_pixel[1]) * pixel_spacing[
+            0
+        ]  # + origin[1]
         if beam_CAX is None:
             physical_edge += origin[1]
 
@@ -212,25 +236,24 @@ def _find_edge_in_slice(image, slice_index, from_negative, along_x, img_max):
         indices = np.where(np.flip(img_slice) >= threshold)[0]
 
     if indices.size != 0:  # If some indices were found
-
         idx = indices[0]
 
         # If the index is not at one of the extremes
         if (idx > 5) and (idx < len(img_slice) - 5):
-
             if from_negative:
                 # Linear interpolation between pixel idx-1 and idx:
                 frac = (threshold - img_slice[idx - 1]) / (
-                        img_slice[idx] - img_slice[idx - 1])
+                    img_slice[idx] - img_slice[idx - 1]
+                )
                 edge_pos = (idx - 1) + frac
 
             else:  # If from positive axis
-
                 flip_slice = np.flip(img_slice)
 
                 # Linear interpolation between pixel idx-1 and idx:
                 frac = (threshold - flip_slice[idx - 1]) / (
-                        flip_slice[idx] - flip_slice[idx - 1])
+                    flip_slice[idx] - flip_slice[idx - 1]
+                )
                 edge_pos = (idx - 1) + frac
 
                 # Subtract 1 because 0-based indexing
@@ -239,8 +262,7 @@ def _find_edge_in_slice(image, slice_index, from_negative, along_x, img_max):
     return edge_pos
 
 
-def _find_edge(image, ds, along_x=True, from_negative=True,
-               lims=None, beam_CAX=None):
+def _find_edge(image, ds, along_x=True, from_negative=True, lims=None, beam_CAX=None):
     """Find the edge of the jaw-defined field in an EPID image
 
     Parameters
@@ -284,7 +306,6 @@ def _find_edge(image, ds, along_x=True, from_negative=True,
 
     # For each slice (excluding the edge cases)
     for slice_index in range(ini_slice_idx, fin_slice_idx):
-
         # Get the position of the edge in this slice
         edge_pos = _find_edge_in_slice(
             image,
@@ -341,13 +362,14 @@ def _find_leaf_indices_from_comb(comb_img, comb_ds):
     """
 
     # If using HDMLC, more robust to first invert the image
-    if '2301' in comb_ds.StationName:  # If RTUS
+    if "2301" in comb_ds.StationName:  # If RTUS
         img = np.max(comb_img) - comb_img
     else:
-
         # If not using HDMLC, more robust to not invert the image
 
         img = comb_img
+
+    img = suppress_hot_pixels(im=img)
 
     # Decide the leaf axis by looking at the mean intensity profiles
     # of the row/s cols. The leaf axis should have higher intensity
@@ -365,8 +387,9 @@ def _find_leaf_indices_from_comb(comb_img, comb_ds):
     else:
         leaf_axis = 1
 
-    if leaf_axis == 0:
+    img = comb_img
 
+    if leaf_axis == 0:
         # First, auto-identify which region of the image occupied
         # by the MLC leaves in the comb pattern
         peaks = find_peaks(np.abs(np.diff(row_means)), height=50, distance=50)
@@ -375,7 +398,6 @@ def _find_leaf_indices_from_comb(comb_img, comb_ds):
 
         # HDMLC characteristically has 6 peaks here
         if len(peak_indices) == 6:
-
             # Hard-code indices based on observed patterns:
             # A-bank is between 1st and 2nd peaks (0-based indexing)
             # B-bank is between 3rd and 4th peaks
@@ -385,7 +407,6 @@ def _find_leaf_indices_from_comb(comb_img, comb_ds):
             end_idx_A = 2
 
         else:  # 120MLC characteristically does NOT have 6 peaks
-
             # Hard-code indices based on observed patterns:
             # A-bank is between 0th and 1st peaks (0-based indexing)
             # B-bank is between 2nd and 3rd peaks
@@ -397,16 +418,13 @@ def _find_leaf_indices_from_comb(comb_img, comb_ds):
         # Identify the part of the image corresponding to bank A/B
         # and average over axis perpendicular to leaf travel
         bank_A_slice = np.mean(
-            img[peak_indices[start_idx_A]: peak_indices[end_idx_A], :],
-            axis=0
+            img[peak_indices[start_idx_A] : peak_indices[end_idx_A], :], axis=0
         )
         bank_B_slice = np.mean(
-            img[peak_indices[start_idx_B]:peak_indices[end_idx_B], :],
-            axis=0
+            img[peak_indices[start_idx_B] : peak_indices[end_idx_B], :], axis=0
         )
 
     else:  # For the other leaf axis
-
         # First, auto-identify which region of the image occupied
         # by the MLC leaves in the comb pattern
         peaks = find_peaks(np.abs(np.diff(col_means)), height=50, distance=50)
@@ -432,25 +450,19 @@ def _find_leaf_indices_from_comb(comb_img, comb_ds):
         # Identify the part of the image corresponding to bank A/B
         # and average over axis perpendicular to leaf travel
         bank_A_slice = np.mean(
-            img[:, peak_indices[start_idx_A]:peak_indices[end_idx_A]],
-            axis=1
+            img[:, peak_indices[start_idx_A] : peak_indices[end_idx_A]], axis=1
         )
         bank_B_slice = np.mean(
-            img[:, peak_indices[start_idx_B]:peak_indices[end_idx_B]],
-            axis=1
+            img[:, peak_indices[start_idx_B] : peak_indices[end_idx_B]], axis=1
         )
 
-
     if len(peak_indices) == 6:  # If using HDMLC
-
         # Further refine the definition of the A/B slices because
         # there is open-field on either side of the MLC banks
-        bank_A_valleys = find_peaks(-bank_A_slice, height=-3000,
-                                    distance=10)[0]
-        bank_A_slice = bank_A_slice[bank_A_valleys[0]:bank_A_valleys[-1]]
-        bank_B_valleys = find_peaks(-bank_B_slice, height=-3000,
-                                    distance=10)[0]
-        bank_B_slice = bank_B_slice[bank_B_valleys[0]:bank_B_valleys[-1]]
+        bank_A_valleys = find_peaks(-bank_A_slice, height=-3000, distance=10)[0]
+        bank_A_slice = bank_A_slice[bank_A_valleys[0] : bank_A_valleys[-1]]
+        bank_B_valleys = find_peaks(-bank_B_slice, height=-3000, distance=10)[0]
+        bank_B_slice = bank_B_slice[bank_B_valleys[0] : bank_B_valleys[-1]]
 
     else:  # If not using HDMLC, then set these to dummy zeroes
         bank_A_valleys = (0, 0)
@@ -470,10 +482,8 @@ def _find_leaf_indices_from_comb(comb_img, comb_ds):
 
     # Store the indices used to define the 'bank A' and 'bank B' leaves
     #   Note: Only used ot calculate the EPID-MLC angle
-    bank_A_idx = np.mean([peak_indices[start_idx_A],
-                         peak_indices[end_idx_A]])
-    bank_B_idx = np.mean([peak_indices[start_idx_B],
-                          peak_indices[end_idx_B]])
+    bank_A_idx = np.mean([peak_indices[start_idx_A], peak_indices[end_idx_A]])
+    bank_B_idx = np.mean([peak_indices[start_idx_B], peak_indices[end_idx_B]])
 
     # --- Section below for plotting extracted leaf positions. Useful
     # for troubleshooting
@@ -500,23 +510,22 @@ def _find_leaf_indices_from_comb(comb_img, comb_ds):
     # plt.show()
 
     # Add-back the valley index to restore original indexing
-    bank_A_leaf_positions = np.array(
-        bank_A_leaf_peaks[0]
-        + bank_A_valleys[0]
-    )
-    bank_B_leaf_positions = np.array(
-        bank_B_leaf_peaks[0]
-        + bank_B_valleys[0]
-    )
+    bank_A_leaf_positions = np.array(bank_A_leaf_peaks[0] + bank_A_valleys[0])
+    bank_B_leaf_positions = np.array(bank_B_leaf_peaks[0] + bank_B_valleys[0])
 
     # Sort and store the leaf positions
     leaf_positions = np.sort(
         np.concatenate((bank_A_leaf_positions, bank_B_leaf_positions))
     )
 
-    return (leaf_positions, leaf_axis,
-            bank_A_leaf_positions, bank_B_leaf_positions,
-            bank_A_idx, bank_B_idx)
+    return (
+        leaf_positions,
+        leaf_axis,
+        bank_A_leaf_positions,
+        bank_B_leaf_positions,
+        bank_A_idx,
+        bank_B_idx,
+    )
 
 
 def _get_bank_A_leaf_positions(img, leaf_indices, leaf_axis, beam_CAX, ds):
@@ -552,7 +561,7 @@ def _get_bank_A_leaf_positions(img, leaf_indices, leaf_axis, beam_CAX, ds):
             slice_index=leaf_indices[ii],
             from_negative=False,
             along_x=leaf_axis == 1,
-            img_max=np.max(img)
+            img_max=np.max(img),
         )
 
     # Find the leaf edges in [mm]
@@ -602,7 +611,7 @@ def _get_bank_B_leaf_positions(img, leaf_indices, leaf_axis, beam_CAX, ds):
             slice_index=leaf_indices[ii],
             from_negative=True,
             along_x=leaf_axis == 1,
-            img_max=np.max(img)
+            img_max=np.max(img),
         )
 
     # Find the leaf edges in [mm]
@@ -656,7 +665,6 @@ def find_leaf_positions(img, ds, leaf_indices, leaf_axis, beam_CAX=None):
     return leaf_edges_A, leaf_edges_A_mm, leaf_edges_B, leaf_edges_B_mm
 
 
-
 def _get_rot_ang(comb_img, comb_ds):
     """Get the angle of rotation between EPID and MLCs
 
@@ -674,10 +682,14 @@ def _get_rot_ang(comb_img, comb_ds):
     """
 
     # Get the leaf positions
-    (leaf_positions, leaf_axis, bank_A_leaf_pos, bank_B_leaf_pos,
-     bank_A_idx, bank_B_idx) = (
-        _find_leaf_indices_from_comb(comb_img=comb_img, comb_ds=comb_ds)
-    )
+    (
+        leaf_positions,
+        leaf_axis,
+        bank_A_leaf_pos,
+        bank_B_leaf_pos,
+        bank_A_idx,
+        bank_B_idx,
+    ) = _find_leaf_indices_from_comb(comb_img=comb_img, comb_ds=comb_ds)
 
     # Denominator for tangent equation
     denom = np.abs(bank_A_idx - bank_B_idx)
@@ -718,20 +730,20 @@ def extract_leaf_positions(comb_ds1, comb_ds2, rot_ang):
         The axis perpendicular to the direction of leaf motion
     """
 
-    img = comb_ds1.pixel_array
+    img = suppress_hot_pixels(comb_ds1.pixel_array)
     img = rotate(img, rot_ang, reshape=False)
 
-    leaf_positions, leaf_axis, _, _, _, _ = (
-        _find_leaf_indices_from_comb(comb_img=img, comb_ds=comb_ds1)
+    leaf_positions, leaf_axis, _, _, _, _ = _find_leaf_indices_from_comb(
+        comb_img=img, comb_ds=comb_ds1
     )
 
     # Keep every 2nd position (ignore one of the banks
     leaf_positions = leaf_positions[::2]
 
-    img2 = comb_ds2.pixel_array
+    img2 = suppress_hot_pixels(comb_ds2.pixel_array)
     img2 = rotate(img2, rot_ang, reshape=False)
-    leaf_positions2, _, _, _, _, _ = (
-        _find_leaf_indices_from_comb(comb_img=img2, comb_ds=comb_ds2)
+    leaf_positions2, _, _, _, _, _ = _find_leaf_indices_from_comb(
+        comb_img=img2, comb_ds=comb_ds2
     )
 
     # Concatenate leaf positions from first comb image with those
@@ -751,7 +763,7 @@ zip_path = FILE.name  # Get path to uploaded .zip file
 tmp_dir = tempfile.mkdtemp()  # Make temp dir for lodaing files in zip
 
 # Open the .zip folder
-with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+with zipfile.ZipFile(zip_path, "r") as zip_ref:
     zip_ref.extractall(tmp_dir)
 
 __D_DIR = tmp_dir  # Define dir for the data
@@ -786,34 +798,28 @@ leaf_positions = np.sort(leaf_positions)
 cc = 0  # Init counter
 
 # Hard-code expected MLC positions.
-if '2301' in comb_ds1.StationName:  # If RTUS
+if "2301" in comb_ds1.StationName:  # If RTUS
     MLC_pos = (
-        np.tile(
-            np.array([-100, 0, 100, -190, -190, -190]
-                     ).reshape(6, 1), (1, 60)
-        ),
-        np.tile(
-            np.array([190, 190, 190, 100, 0, -100]
-                     ).reshape(6, 1), (1, 60)
-        ),
+        np.tile(np.array([-100, 0, 100, -190, -190, -190]).reshape(6, 1), (1, 60)),
+        np.tile(np.array([190, 190, 190, 100, 0, -100]).reshape(6, 1), (1, 60)),
     )
 else:  # If using non-RTUS (i.e., 120MLC)
     MLC_leaves_row = np.concatenate(
-        (np.array([-150, -160, -170, -180]),
-         np.full(60 - 8, -190),
-         np.array([-180, -170, -160, -150]))
+        (
+            np.array([-150, -160, -170, -180]),
+            np.full(60 - 8, -190),
+            np.array([-180, -170, -160, -150]),
+        )
     )
 
     MLC_pos = (
-        np.vstack(
-            [np.full(60, v) for v in [-100, 0, 100]]
-            + [MLC_leaves_row] * 3
+        np.vstack([np.full(60, v) for v in [-100, 0, 100]] + [MLC_leaves_row] * 3),
+        np.flip(
+            np.vstack(
+                [np.full(60, v) for v in [-100, 0, 100]] + [-1 * MLC_leaves_row] * 3
+            )
         ),
-        np.flip(np.vstack(
-            [np.full(60, v) for v in [-100, 0, 100]]
-            + [-1 * MLC_leaves_row] * 3
-        ))
-        )
+    )
 
 # Init lists for creating .pdf report
 img_fig_list = []
@@ -831,7 +837,6 @@ mlc_pos_list = []  # Init list for QA Track integration
 
 # For every image (excluding the CAX and comb images)
 for ff in sorted(os.listdir(__D_DIR))[4:]:
-
     ds = dcmread(os.path.join(__D_DIR, ff))  # Get dicom
 
     image = ds.pixel_array
@@ -840,12 +845,13 @@ for ff in sorted(os.listdir(__D_DIR))[4:]:
     image = rotate(image, angle=rot_ang, reshape=False)
 
     # Normalize image
-    image = (image- np.min(image)) / (np.max(image) - np.min(image))
+    image = (image - np.min(image)) / (np.max(image) - np.min(image))
+    image = suppress_hot_pixels(im=image)
+    image = (image - np.min(image)) / (np.max(image) - np.min(image))
     img_max = np.max(image)
 
     # Extract the positions in indices and [mm] of each leaf
-    (A_leafs, A_leafs_mm,
-     B_leafs, B_leafs_mm) = find_leaf_positions(
+    (A_leafs, A_leafs_mm, B_leafs, B_leafs_mm) = find_leaf_positions(
         img=image,
         ds=ds,
         leaf_indices=leaf_positions,
@@ -863,9 +869,7 @@ for ff in sorted(os.listdir(__D_DIR))[4:]:
     A_errs = A_leafs_mm - MLC_pos[1][cc, :]
     B_errs = B_leafs_mm - MLC_pos[0][cc, :]
 
-    mlc_pos_list.append(
-        (A_leafs_mm, B_leafs_mm, MLC_pos[1][cc, :], MLC_pos[0][cc, :])
-    )
+    mlc_pos_list.append((A_leafs_mm, B_leafs_mm, MLC_pos[1][cc, :], MLC_pos[0][cc, :]))
 
     # Get the expected positions of the MLC banks here
     bank_B_pos = np.median(MLC_pos[0][cc, :])
@@ -901,44 +905,57 @@ for ff in sorted(os.listdir(__D_DIR))[4:]:
 
     fig = plt.figure(figsize=(12, 8))
 
-    gs = fig.add_gridspec(2, 2,
-                          figure=fig,
-                          width_ratios=[3, 1],
-                          height_ratios=[1, 1],
-                          wspace=0.3, hspace=0.4)
+    gs = fig.add_gridspec(
+        2,
+        2,
+        figure=fig,
+        width_ratios=[3, 1],
+        height_ratios=[1, 1],
+        wspace=0.3,
+        hspace=0.4,
+    )
 
     ax_img = fig.add_subplot(gs[:, 0])
     ax_Bbar = fig.add_subplot(gs[0, 1])
     ax_Abar = fig.add_subplot(gs[1, 1])
 
     fig.suptitle("Image %d" % (image_number), fontsize=16, y=0.96)
-    fig.text(0.5, 0.88,
-             "Bank A: Worst leaf was %d with position error %.2f mm\n"
-         "Bank B: Worst leaf was %d with position error %.2f mm"
-             % (wA_idx + 1, wA_err, wB_idx + 1, wB_err),
-             ha="center")
+    fig.text(
+        0.5,
+        0.88,
+        "Bank A: Worst leaf was %d with position error %.2f mm\n"
+        "Bank B: Worst leaf was %d with position error %.2f mm"
+        % (wA_idx + 1, wA_err, wB_idx + 1, wB_err),
+        ha="center",
+    )
 
     ax_img.imshow(image, cmap="gray")
-    ax_img.axhline(A_edge, color="y", linestyle="-", linewidth=2,
-                   label="Detected A-bank Edge")
-    ax_img.axhline(B_edge, color="y", linestyle="--", linewidth=2,
-                   label="Detected B-bank Edge")
+    ax_img.axhline(
+        A_edge, color="y", linestyle="-", linewidth=2, label="Detected A-bank Edge"
+    )
+    ax_img.axhline(
+        B_edge, color="y", linestyle="--", linewidth=2, label="Detected B-bank Edge"
+    )
     cx = image.shape[1] / 2.0
 
-    ax_img.text(cx, A_edge + 150,
-                "Meas: %.2f mm\nPlan: %.2f mm"
-                "\nMedian Diff: %.2f mm" % (
-                    A_edge_mm, bank_A_pos, A_edge_mm - bank_A_pos),
-                fontsize=9, color="red",
-                bbox=dict(facecolor="white", alpha=0.9, edgecolor="black",
-                          boxstyle="round"))
-    ax_img.text(cx, B_edge + 150,
-                "Meas: %.2f mm\nPlan: %.2f mm"
-                "\nMedian Diff: %.2f mm" % (
-                    B_edge_mm, bank_B_pos, B_edge_mm-bank_B_pos),
-                fontsize=9, color="red",
-                bbox=dict(facecolor="white", alpha=0.9, edgecolor="black",
-                          boxstyle="round"))
+    ax_img.text(
+        cx,
+        A_edge + 150,
+        "Meas: %.2f mm\nPlan: %.2f mm"
+        "\nMedian Diff: %.2f mm" % (A_edge_mm, bank_A_pos, A_edge_mm - bank_A_pos),
+        fontsize=9,
+        color="red",
+        bbox=dict(facecolor="white", alpha=0.9, edgecolor="black", boxstyle="round"),
+    )
+    ax_img.text(
+        cx,
+        B_edge + 150,
+        "Meas: %.2f mm\nPlan: %.2f mm"
+        "\nMedian Diff: %.2f mm" % (B_edge_mm, bank_B_pos, B_edge_mm - bank_B_pos),
+        fontsize=9,
+        color="red",
+        bbox=dict(facecolor="white", alpha=0.9, edgecolor="black", boxstyle="round"),
+    )
 
     ax_img.set_xlabel("Pixel Column")
     ax_img.set_ylabel("Pixel Row")
@@ -947,8 +964,7 @@ for ff in sorted(os.listdir(__D_DIR))[4:]:
     x = np.arange(len(B_errs))
     B_colors = ["b"] * len(B_errs)
     B_colors[wB_idx] = "r"
-    ax_Bbar.bar(x, B_errs, width=0.75, color=B_colors, edgecolor="k",
-                linewidth=0.5)
+    ax_Bbar.bar(x, B_errs, width=0.75, color=B_colors, edgecolor="k", linewidth=0.5)
     ax_Bbar.set_title("Bank B errors")
     ax_Bbar.set_xlabel("Leaf Number")
     ax_Bbar.set_ylabel("Position Error (mm)")
@@ -956,8 +972,7 @@ for ff in sorted(os.listdir(__D_DIR))[4:]:
     x = np.arange(len(A_errs))
     A_colors = ["b"] * len(A_errs)
     A_colors[wA_idx] = "r"
-    ax_Abar.bar(x, A_errs, width=0.75, color=A_colors, edgecolor="k",
-                linewidth=0.5)
+    ax_Abar.bar(x, A_errs, width=0.75, color=A_colors, edgecolor="k", linewidth=0.5)
     ax_Abar.set_title("Bank A errors")
     ax_Abar.set_xlabel("Leaf Number")
     ax_Abar.set_ylabel("Position Error (mm)")
@@ -972,28 +987,33 @@ for ff in sorted(os.listdir(__D_DIR))[4:]:
 
 # Make summary_data for plt.table() and dict for QA Track reporting
 summary_data = []
-qat_dict = dict()
+mlc_position_images = dict()
 
 for ii in range(len(mlc_pos_list)):  # For each target image
-
     # Get leaf measured/planned positions
     A_leafs, B_leafs, A_leafs_plan, B_leafs_plan = mlc_pos_list[ii]
 
     # Make entry for QA Track, reporting result in [cm] units
-    qat_dict = _make_qat_dict_entry(
+    mlc_position_images = _make_qat_dict_entry(
         mlc_A_calc_pos=A_leafs / 10,
         mlc_B_calc_pos=B_leafs / 10,
         mlc_A_plan_pos=A_leafs_plan / 10,
         mlc_B_plan_pos=B_leafs_plan / 10,
-        qat_dict=qat_dict,
+        qat_dict=mlc_position_images,
     )
 
 # Create summary page for the pdf report
 fig_summary = plt.figure(figsize=(8, 11))
 fig_summary.patch.set_facecolor("white")
 
-fig_summary.text(0.5, 0.9, "MLC Leaf Position Deviations Summary",
-                 ha="center", fontsize=18, weight="bold")
+fig_summary.text(
+    0.5,
+    0.9,
+    "MLC Leaf Position Deviations Summary",
+    ha="center",
+    fontsize=18,
+    weight="bold",
+)
 
 y = 0.84
 dy = 0.035
@@ -1007,25 +1027,27 @@ for level, bank, leaf, err, img_num in alerts:
         color = "darkgoldenrod"
         triggered_level = tol_level
 
-    fig_summary.text(0.1, y,
-                     f"{level}: Bank {bank} Leaf {leaf + 1} in "
-                     f"image number {img_num} "
-                     f"had position error {err:.2f} mm\n    above "
-                     f"Level {2 if level.startswith('ACTION') else 1} "
-                     f"tolerance of {triggered_level:.2f} mm.",
-                     color=color, fontsize=10)
+    fig_summary.text(
+        0.1,
+        y,
+        f"{level}: Bank {bank} Leaf {leaf + 1} in "
+        f"image number {img_num} "
+        f"had position error {err:.2f} mm\n    above "
+        f"Level {2 if level.startswith('ACTION') else 1} "
+        f"tolerance of {triggered_level:.2f} mm.",
+        color=color,
+        fontsize=10,
+    )
     y -= dy
 
 # overall stats
 max_err = max(all_errors) if all_errors else 0.0
 avg_err = np.mean(all_errors) if all_errors else 0.0
-fig_summary.text(0.1, y,
-                 f"Max leaf position deviation: {max_err:.2f} mm",
-                 fontsize=12)
+fig_summary.text(0.1, y, f"Max leaf position deviation: {max_err:.2f} mm", fontsize=12)
 y -= dy
-fig_summary.text(0.1, y,
-                 f"Average leaf position deviation: {avg_err:.2f} mm",
-                 fontsize=12)
+fig_summary.text(
+    0.1, y, f"Average leaf position deviation: {avg_err:.2f} mm", fontsize=12
+)
 
 # Create pdf report
 with PdfPages(pdf_report_path) as pdf:
