@@ -6,8 +6,8 @@ DATA_DIR ← tmp_dir
 FILES ← sorted list of files in DATA_DIR
 
 # 2. Compute beam CAX
-IMG1 ← pixel array of FILES[0]
-IMG2 ← pixel array of FILES[1]
+IMG1 ← pixel array of FILES[0], correct any outlier pixels
+IMG2 ← pixel array of FILES[1], correct any outlier pixels
 C1 ← centroid of pixels ≥50% max intensity in IMG1
 C2 ← centroid of pixels ≥50% max intensity in IMG2
 beam_CAX ← midpoint of C1 and C2 (swap to (x,y) order)
@@ -20,7 +20,7 @@ figures ← []
 for FILE in FILES[2:]:
     ds ← read DICOM FILE
     img ← ds.pixel_array
-    normalize img to [0,1]
+    normalize img to [0,1] and correct any outliers
     if ds.BeamLimitingDeviceAngle ≈ 270: # If col was rotated 
         img ← transpose img
         this_CAX ← swap beam_CAX
