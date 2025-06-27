@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 from pydicom import dcmread
 import zipfile
 import tempfile
+from scipy imoprt ndimage as ndi
+from skimage import morphology
 from matplotlib.backends.backend_pdf import PdfPages
 
 ###############################################################################
@@ -19,6 +21,26 @@ __D_DIR = os.path.join(
 )
 
 ###############################################################################
+
+
+def suppress_hot_pixels(im, structure=np.ones((3, 3), bool)):
+    """ """
+    im = im.astype(float, copy=False)
+
+    hot_candidate = im > 0.3
+
+    isolated = hot_candidate & ~morphology.binary_opening(hot_candidate, structure)
+
+    if not isolated.any():
+        return im
+
+    kernel = np.ones((3, 3), float)
+    kernel[1, 1] = 0
+    neigh_mean = ndi.convolve(im, kernel, mode="reflect") / 8.0
+
+    im_fixed = im.copy()
+    im_fixed[isolated] = neigh_mean[isolated]
+    return im_fixed
 
 
 def _find_center_of_img(img):
@@ -37,6 +59,10 @@ def _find_center_of_img(img):
 
     # Normalize image
     img_normalized = (img - np.min(img)) / (np.max(img) - np.min(img))
+    img_normalized = suppress_hot_pixels(im=img_normalized)
+    img_normalized = (img_normalized - np.min(img_normalized)) / (
+        np.max(img_normalized) - np.min(img_normalized)
+    )
 
     # Find the center pixel
     c_pix = np.argwhere(
@@ -436,6 +462,8 @@ if __name__ == "__main__":
 
         # Get image, normalize, and store max value
         image = ds.pixel_array
+        image = (image - np.min(image)) / (np.max(image) - np.min(image))
+        image = suppress_hot_pixels(im=image)
         image = (image - np.min(image)) / (np.max(image) - np.min(image))
         img_max = np.max(image)
 
