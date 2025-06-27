@@ -3,12 +3,12 @@ DATA_DIR ← path to folder of files
 FILES ← sorted list of files in DATA_DIR
 
 # 2. Compute beam central axis (CAX)
-IMG1, IMG2 ← pixel arrays from first two DICOMs
+IMG1, IMG2 ← pixel arrays from first two DICOMs, corrected for any outlier pixels
 C1, C2 ← centroids of high-intensity regions in IMG1 and IMG2
 beam_CAX ← midpoint of C1 and C2 (swap to (x,y) order)
 
 # 3. Determine EPID-to-MLC rotation
-COMB1, COMB2 ← pixel arrays from next two DICOMs
+COMB1, COMB2 ← pixel arrays from next two DICOMs, corrected for any outlier pixels
 ROT1 ← avg angle calculated by comparing opposing leaf positions (leaf N from bank A vs bank B) from COMB1
 ROT2 ← same for COMB2
 rot_angle ← average(ROT1, ROT2)
@@ -30,7 +30,7 @@ all_errors, alerts, worst_A, worst_B, figures_list ← empty
 # 7. For each remaining QA image, i.e., for non-MV-CAX and non-COMB images
 for each FILE in FILES[4:]:
     img ← read and rotate pixel array by rot_angle
-    normalize img to [0,1]
+    normalize img to [0,1] and correct any outlier pixels
 
     # 7a. Measure each leaf’s position
     for each index in LEAF_INDICES:
