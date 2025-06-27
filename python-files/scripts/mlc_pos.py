@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 from pydicom import dcmread
 from scipy.signal import find_peaks
 from scipy.ndimage import rotate
+imoprt scipy.ndimage as ndi
+from skimage import morphology
 from matplotlib.backends.backend_pdf import PdfPages
 
 ###############################################################################
@@ -69,6 +71,26 @@ def _make_qat_dict_entry(mlc_A_calc_pos, mlc_B_calc_pos,
     return qat_dict
 
 
+def suppress_hot_pixels(im, structure=np.ones((3, 3), bool)):
+    """ """
+    im = im.astype(float, copy=False)
+
+    hot_candidate = im > 0.3
+
+    isolated = hot_candidate & ~morphology.binary_opening(hot_candidate, structure)
+
+    if not isolated.any():
+        return im
+
+    kernel = np.ones((3, 3), float)
+    kernel[1, 1] = 0
+    neigh_mean = ndi.convolve(im, kernel, mode="reflect") / 8.0
+
+    im_fixed = im.copy()
+    im_fixed[isolated] = neigh_mean[isolated]
+    return im_fixed
+
+
 def _find_center_of_img(img):
     """Find center of the jaw-defined field
 
@@ -85,6 +107,10 @@ def _find_center_of_img(img):
 
     # Normalize image
     img_normalized = (img - np.min(img)) / (np.max(img) - np.min(img))
+    img_normalized = suppress_hot_pixels(im=img_normalized)
+    img_normalized = (img_normalized - np.min(img_normalized)) / (
+        np.max(img_normalized) - np.min(img_normalized)
+    )
 
     # Find the center pixel
     c_pix = np.argwhere(
@@ -357,6 +383,8 @@ def _find_leaf_indices_from_comb(comb_img, comb_ds):
         # If not using HDMLC, more robust to not invert the image
         img = comb_img
 
+    img = suppress_hot_pixels(im=img)
+
     # Decide the leaf axis by looking at the mean intensity profiles
     # of the row/s cols. The leaf axis should have higher intensity
     # (because of open-field gap in middle)
@@ -372,6 +400,8 @@ def _find_leaf_indices_from_comb(comb_img, comb_ds):
         leaf_axis = 0
     else:
         leaf_axis = 1
+
+    img = comb_img
 
     if leaf_axis == 0:
 
@@ -725,7 +755,7 @@ def extract_leaf_positions(comb_ds1, comb_ds2, rot_ang):
         The axis perpendicular to the direction of leaf motion
     """
 
-    img = comb_ds1.pixel_array
+    img = suppress_hot_pixels(comb_ds1.pixel_array)
     img = rotate(img, rot_ang, reshape=False)
 
     leaf_positions, leaf_axis, _, _, _, _ = (
@@ -735,7 +765,7 @@ def extract_leaf_positions(comb_ds1, comb_ds2, rot_ang):
     # Keep every 2nd position (ignore one of the banks
     leaf_positions = leaf_positions[::2]
 
-    img2 = comb_ds2.pixel_array
+    img2 = suppress_hot_pixels(comb_ds2.pixel_array)
     img2 = rotate(img2, rot_ang, reshape=False)
     leaf_positions2, _, _, _, _, _ = (
         _find_leaf_indices_from_comb(comb_img=img2, comb_ds=comb_ds2)
@@ -848,6 +878,8 @@ if __name__ == "__main__":
 
         # Normalize image
         image = (image- np.min(image)) / (np.max(image) - np.min(image))
+        image = suppress_hot_pixels(im=image)
+        image = (image - np.min(image)) / (np.max(image) - np.min(image))
         img_max = np.max(image)
 
         # Extract the positions in indices and [mm] of each leaf
